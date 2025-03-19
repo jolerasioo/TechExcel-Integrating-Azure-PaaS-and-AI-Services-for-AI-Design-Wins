@@ -126,6 +126,7 @@ app.MapGet("/Hotels/{hotelId}/Bookings/{min_date}", async (int hotelId, DateTime
 // This endpoint is used to send a message to the Azure OpenAI endpoint.
 app.MapPost("/Chat", async Task<string> (HttpRequest request) =>
 {
+    Console.WriteLine($"Received a chat message. {request.Form["message"]}");
     
     var message = await Task.FromResult(request.Form["message"]);
     var kernel = app.Services.GetRequiredService<Kernel>();
