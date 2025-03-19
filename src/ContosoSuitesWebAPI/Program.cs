@@ -157,7 +157,7 @@ app.MapPost("/Chat", async Task<string> (HttpRequest request, ILogger<Program> l
     catch (Exception ex)
     {
         logger.LogError(ex, "Error processing chat request");
-        throw;
+        return $"Error processing chat request: {ex.Message}\n {ex.InnerException?.Message}";
     }
 })
     .WithName("Chat")
