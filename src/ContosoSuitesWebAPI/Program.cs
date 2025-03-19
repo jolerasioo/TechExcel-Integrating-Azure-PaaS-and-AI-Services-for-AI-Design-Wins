@@ -76,11 +76,14 @@ builder.Services.AddSingleton<AzureOpenAIClient>((_) =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI();
+//}
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
@@ -123,6 +126,7 @@ app.MapGet("/Hotels/{hotelId}/Bookings/{min_date}", async (int hotelId, DateTime
 // This endpoint is used to send a message to the Azure OpenAI endpoint.
 app.MapPost("/Chat", async Task<string> (HttpRequest request) =>
 {
+    
     var message = await Task.FromResult(request.Form["message"]);
     var kernel = app.Services.GetRequiredService<Kernel>();
     var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
