@@ -94,16 +94,18 @@ app.UseHttpsRedirection();
 
 /**** Endpoints ****/
 // This endpoint serves as the default landing page for the API.
-app.MapGet("/", async () => 
+app.MapGet("/", async ( ILogger<Program> logger) => 
 {
+    logger.LogInformation("Index endpoint called");
     return "Welcome to the Contoso Suites Web API!";
 })
     .WithName("Index")
     .WithOpenApi();
 
 // Retrieve the set of hotels from the database.
-app.MapGet("/Hotels", async () => 
+app.MapGet("/Hotels", async ( ILogger<Program> logger) => 
 {
+    logger.LogInformation("GetHotels endpoint called");
     var hotels = await app.Services.GetRequiredService<IDatabaseService>().GetHotels();
     return hotels;
 })
