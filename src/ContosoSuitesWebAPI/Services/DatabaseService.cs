@@ -124,6 +124,7 @@ public class DatabaseService(string connectionString) : IDatabaseService
     [Description("Get all bookings that do not have associated hotel rooms to them.")]
     public async Task<IEnumerable<Booking>> GetBookingsMissingHotelRooms()
     {
+        Console.WriteLine("Getting bookings missing hotel rooms...");
         var sql = """
             SELECT
                 b.BookingID,

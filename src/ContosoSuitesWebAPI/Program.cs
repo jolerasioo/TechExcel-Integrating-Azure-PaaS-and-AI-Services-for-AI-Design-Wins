@@ -19,6 +19,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddLogging(loggingBuilder =>
+{
+    loggingBuilder.AddConsole();
+    loggingBuilder.AddDebug();
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -124,23 +129,37 @@ app.MapGet("/Hotels/{hotelId}/Bookings/{min_date}", async (int hotelId, DateTime
     .WithOpenApi();
 
 // This endpoint is used to send a message to the Azure OpenAI endpoint.
-app.MapPost("/Chat", async Task<string> (HttpRequest request) =>
+app.MapPost("/Chat", async Task<string> (HttpRequest request, ILogger<Program> logger) =>
 {
-    Console.WriteLine($"Received a chat message. {request.Form["message"]}");
-    
-    var message = await Task.FromResult(request.Form["message"]);
-    var kernel = app.Services.GetRequiredService<Kernel>();
-    var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
-    var executionSettings = new OpenAIPromptExecutionSettings
+    logger.LogInformation("Chat endpoint called");
+    Console.WriteLine("Chat endpoint called");
+    try
     {
-        ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
-    };
-    var response = await chatCompletionService.GetChatMessageContentAsync(message.ToString(), executionSettings, kernel);
-    return response?.Content!;
+        var messageText = request.Form["message"].ToString();
+        logger.LogInformation("Received chat message: {Message}", messageText);
+        
+        var message = await Task.FromResult(request.Form["message"]);
+        var kernel = app.Services.GetRequiredService<Kernel>();
+        var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
+        var executionSettings = new OpenAIPromptExecutionSettings
+        {
+            ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
+        };
+        
+        logger.LogInformation("Sending message to OpenAI...");
+        var response = await chatCompletionService.GetChatMessageContentAsync(message.ToString(), executionSettings, kernel);
+        logger.LogInformation("Received response from OpenAI!");
+        
+        return response?.Content!;
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error processing chat request");
+        throw;
+    }
 })
     .WithName("Chat")
     .WithOpenApi();
-
 
 // This endpoint is used to vectorize a text string.
 // We will use this to generate embeddings for the maintenance request text.
